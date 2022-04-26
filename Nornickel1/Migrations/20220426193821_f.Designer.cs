@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Nornickel1.EF;
 
@@ -10,9 +11,10 @@ using Nornickel1.EF;
 namespace Nornickel1.Migrations
 {
     [DbContext(typeof(DbAthContext))]
-    partial class DbAthContextModelSnapshot : ModelSnapshot
+    [Migration("20220426193821_f")]
+    partial class f
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -7,17 +7,67 @@ static void AdoNetDemo()
 {
     var connection = new SqlConnection(@"Server=.\SQLEXPRESS01;Database=hw_1;Trusted_Connection=True;");
     connection.Open();
+    Console.WriteLine("Сортировка по убыванию числа побед: ");
+
     var command = connection.CreateCommand();
-    command.CommandText = "SELECT * FROM Category";
+    command.CommandText = "SELECT Athlete.FIO, Category.Title FROM Athlete INNER JOIN Category ON Athlete.Weight_Category = Category.ID ORDER BY Wins DESC";
     var reader = command.ExecuteReader();
     while (reader.Read())
     {
-        Console.WriteLine($"Title = {reader.GetString(reader.GetOrdinal("Title"))}");
+        Console.WriteLine($"FIO = {reader.GetString(reader.GetOrdinal("FIO"))}, Category = {reader.GetString(reader.GetOrdinal("Title"))} ");
+    } 
+    reader.Close();
+
+    Console.WriteLine("Сортировка по возрастанию числа побед: ");
+    command = connection.CreateCommand();
+    command.CommandText = "SELECT Athlete.FIO, Category.Title FROM Athlete INNER JOIN Category ON Athlete.Weight_Category = Category.ID ORDER BY Wins ASC";
+
+    reader = command.ExecuteReader();
+    while (reader.Read())
+    {
+        Console.WriteLine($"FIO = {reader.GetString(reader.GetOrdinal("FIO"))}, Category = {reader.GetString(reader.GetOrdinal("Title"))} ");
     }
     reader.Close();
+
+    Console.WriteLine("Первые 3 молодых бойца");
+   
+    command = connection.CreateCommand();
+    command.CommandText = "SELECT TOP(3) FIO, Weight_Category FROM Athlete WHERE (Wins + Lose > 10 AND Year(GetDate()) - YearStart < 5) ORDER BY (Wins/Lose) DESC";
+    reader = command.ExecuteReader();
+    while (reader.Read())
+    {
+        Console.WriteLine($"FIO = {reader.GetString(reader.GetOrdinal("FIO"))}");
+    }
+    reader.Close();
+
+    Console.WriteLine("Перспективные, > 10 матчей, коэф. побед выше среднего");
+
+    command = connection.CreateCommand();
+    command.CommandText = "WITH AVER AS(SELECT AVG(Wins / Lose) AS AV FROM Athlete) SELECT TOP(3) FIO, Weight_Category FROM Athlete, AVER WHERE (Wins + Lose > 10 AND (Wins/Lose > AVER.AV)) ORDER BY(Wins/Lose) DESC ";
+    reader = command.ExecuteReader();
+    while (reader.Read())
+    {
+        Console.WriteLine($"FIO = {reader.GetString(reader.GetOrdinal("FIO"))}");
+    }
+    reader.Close();
+
+    Console.WriteLine("Весовая категория и средняя продолжительность карьеры");
+    command = connection.CreateCommand();
+    command.CommandText = "SELECT Category.Title, AVG(YEAR(GETDATE()) - Athlete.YearStart) AS Career FROM Athlete INNER JOIN Category ON Athlete.Weight_Category = Category.ID GROUP BY Category.Title";
+    reader = command.ExecuteReader();
+    while (reader.Read())
+    {
+        Console.WriteLine($"{reader.GetString(reader.GetOrdinal("Title"))} : {reader.GetInt32(1)}");
+    }
+    reader.Close();
+
     connection.Close();
 }
-//AdoNetDemo();
+
+AdoNetDemo();
+
+
+
 
 static void LinqDemo()
 {
@@ -228,3 +278,44 @@ static void EF()
     }
 }
 
+
+
+/*static void EF1()
+{
+    using (DbAthContext db = new DbAthContext())
+    {
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        Console.OutputEncoding = Encoding.GetEncoding(1251);
+
+        // пересоздаем базу данных
+        db.Database.EnsureDeleted();
+        db.Database.EnsureCreated();
+        db.SaveChanges();
+
+        Category1 high = new Category1 { Title = "Тяжелый вес" };
+        Category1 mid = new Category1 { Title = "Средний вес" };
+        Category1 light = new Category1 { Title = "Легкий вес" };
+
+        db.Categories.AddRange(high, mid, light);
+        db.SaveChanges();
+
+        Athlete1 a1 = new Athlete1 { FIO = "Леннокс Льюис", wins = 41, lose = 2, year = 1989, Category = high };
+        Athlete1 a2 = new Athlete1 { FIO = "Макс Тайсон", wins = 50, lose = 6, year = 1985, Category = high};
+        Athlete1 a3 = new Athlete1 { FIO = "Виталий Кличко", wins = 45, lose = 2, year = 1996, Category = high };
+        Athlete1 a4 = new Athlete1 { FIO = "Оскар Де Лахойя", wins = 45, lose = 6, year = 1992, Category = mid };
+        Athlete1 a5 = new Athlete1 { FIO = "Бернард Хопкинс", wins = 55, lose = 8, year = 1988, Category = mid };
+        Athlete1 a6 = new Athlete1 { FIO = "Джермин Тейлор", wins = 33, lose = 4, year = 2001, Category = mid };
+        Athlete1 a7 = new Athlete1 { FIO = "Juan Manuel Márque", wins = 56, lose = 7, year = 1993, Category = light };
+        Athlete1 a8 = new Athlete1 { FIO = "Nate Campbell", wins = 37, lose = 11, year = 2000, Category = light };
+        Athlete1 a9 = new Athlete1 { FIO = "Humberto Soto", wins = 69, lose = 10, year = 1997, Category = light };
+        // для запросов, тестов
+        Athlete1 a10 = new Athlete1 { FIO = "1", wins = 9, lose = 5, year = 2019, Category = light };
+        Athlete1 a11 = new Athlete1 { FIO = "2", wins = 10, lose = 5, year = 2020, Category = mid };
+        Athlete1 a12 = new Athlete1 { FIO = "3", wins = 3, lose = 8, year = 2020, Category = mid };
+        Athlete1 a13 = new Athlete1 { FIO = "4", wins = 11, lose = 3, year = 2020, Category = high };
+        Athlete1 a14 = new Athlete1 { FIO = "5", wins = 8, lose = 1, year = 2020, Category = high };
+
+        db.Athletes.AddRange(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14);
+        db.SaveChanges();
+    }
+}*/

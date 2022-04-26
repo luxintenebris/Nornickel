@@ -21,6 +21,7 @@ namespace Nornickel1.EF
         public void CreateIfNotEx()
         {
             this.Database.EnsureCreated();
+           
         }
 
         //@"Server=.\SQLEXPRESS01;Database=hw_1;Trusted_Connection=True;"
