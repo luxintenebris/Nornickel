@@ -61,12 +61,28 @@ static void AdoNetDemo()
     }
     reader.Close();
 
+    Console.WriteLine("Весовая категория и средняя продолжительность карьеры");
+    command = connection.CreateCommand();
+    command.CommandText = "DECLARE @maxCar INT SELECT @maxCar = MAX (YEAR(GETDATE())-YearStart) from Athlete SELECT ID from Athlete WHERE YEAR(GETDATE())-YearStart = @maxCar";
+    reader = command.ExecuteReader();
+    int id1 = 0 ;
+    while (reader.Read())
+    {
+         id1 = reader.GetInt32(0);
+    }
+   
+    reader.Close();
+    command = connection.CreateCommand();
+    command.CommandText = $"DELETE Athlete where Athlete.ID = {id1}";
+    reader = command.ExecuteReader();
+    reader.Close();
+
     connection.Close();
 }
 
 AdoNetDemo();
 
-
+//LinqDemo();
 
 
 static void LinqDemo()
